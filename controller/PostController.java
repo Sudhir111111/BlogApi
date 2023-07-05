@@ -38,12 +38,12 @@ public class PostController {
         return new ResponseEntity<>(postById,HttpStatus.OK) ;
     }
 
-//    @GetMapping
-//    public List<PostDto> getAllPosts(){
-//        List<PostDto> postdtos =postService.getAllPosts();
-//
-//        return postdtos;
-//    }
+    @GetMapping
+    public List<PostDto> getAllPosts(){
+       List<PostDto> postdtos =postService.getAllPosts();
+
+       return postdtos;
+   }
     @DeleteMapping("{id}")
     public ResponseEntity<String>deletepost(@PathVariable("id") long id){ //status code is 200
 
@@ -59,16 +59,16 @@ public class PostController {
 
     //localhost:8080/api/posts?pageNo=1
                             // ?pageNo=1& pagesize=3&sortedBy=title&sorteDir=desc
-    @GetMapping
-    public List<PostDto> getAllPostsPaging(@RequestParam(value = "pageNo",defaultValue = "0",required = false) int pageNo,
-                                      @RequestParam(value = "pagesize",defaultValue = "5",required = false) int pagesize,
-                                           @RequestParam(value = "sortedBy",defaultValue = "id",required = false) String sortedBy,
-                                       @RequestParam(value = "sorteDir",defaultValue = "5",required = false) String sorteDir)
-
-    {
-        List<PostDto> allPostsPaging = postService.getAllPostsPaging(pageNo, pagesize,sortedBy,sorteDir);
-
-        return allPostsPaging;
-    }
+//    @GetMapping
+//    public List<PostDto> getAllPostsPaging(@RequestParam(value = "pageNo",defaultValue = "0",required = false) int pageNo,
+//                                      @RequestParam(value = "pagesize",defaultValue = "5",required = false) int pagesize,
+//                                           @RequestParam(value = "sortedBy",defaultValue = "id",required = false) String sortedBy,
+//                                       @RequestParam(value = "sorteDir",defaultValue = "5",required = false) String sorteDir)
+//
+//    {
+//        List<PostDto> allPostsPaging = postService.getAllPostsPaging(pageNo, pagesize,sortedBy,sorteDir);
+//
+//        return allPostsPaging;
+//    }
 
 }
