@@ -1,7 +1,9 @@
 package com.blogapi.controller;
 
+import com.blogapi.entity.Role;
 import com.blogapi.entity.User;
 import com.blogapi.paylod.SignUpDto;
+import com.blogapi.repository.RoleRepository;
 import com.blogapi.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {
@@ -20,6 +24,8 @@ public class AuthController {
     UserRepository userRepository;
  @Autowired
     PasswordEncoder passwordEncoder;
+ @Autowired
+ private RoleRepository roleRepository;
 
 
 //localhost:8080/api/auth/signup
@@ -41,8 +47,9 @@ public class AuthController {
         user.setUsername(signUpDto.getUsername());
         user.setEmail(signUpDto.getEmail());
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-//        Role roles = roleRepository.findByName("ROLE_ADMIN").get();
-//        user.setRoles(Collections.singleton(roles));
+
+        Role roles = roleRepository.findByName("ROLE_ADMIN").get();
+        user.setRoles(Collections.singleton(roles));
         userRepository.save(user);
         return new ResponseEntity<>("User registered successfully",
                 HttpStatus.OK);
