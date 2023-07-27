@@ -2,10 +2,12 @@ package com.blogapi.controller;
 
 import com.blogapi.entity.Role;
 import com.blogapi.entity.User;
+import com.blogapi.paylod.JWTAuthResponse;
 import com.blogapi.paylod.LoginDto;
 import com.blogapi.paylod.SignUpDto;
 import com.blogapi.repository.RoleRepository;
 import com.blogapi.repository.UserRepository;
+import com.blogapi.security.JwtTokenProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.http.HttpStatus;
@@ -26,17 +28,26 @@ import java.util.Collections;
 @RequestMapping("/api/auth")
 public class AuthController {
     @Autowired
-    UserRepository userRepository;
- @Autowired
-    PasswordEncoder passwordEncoder;
- @Autowired
- private RoleRepository roleRepository;
-
-    @Autowired
     private AuthenticationManager authenticationManager;
-
-
-//localhost:8080/api/auth/signup
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private RoleRepository roleRepository;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+    @Autowired
+    private JwtTokenProvider tokenProvider;
+    @PostMapping("/signin")
+    public ResponseEntity<JWTAuthResponse> authenticateUser(@RequestBody LoginDto
+                                                                    loginDto){
+        Authentication authentication = authenticationManager.authenticate(new
+                UsernamePasswordAuthenticationToken(
+                loginDto.getUsernameOrEmail(), loginDto.getPassword()));
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+        // get token form tokenProvider
+        String token = tokenProvider.generateToken(authentication);
+        return ResponseEntity.ok(new JWTAuthResponse(token));
+    }
     @PostMapping("/signup")
     public ResponseEntity<?> registerUser(@RequestBody SignUpDto signUpDto){
         // add check for username exists in a DB
@@ -46,8 +57,7 @@ public class AuthController {
         }
         // add check for email exists in DB
         if(userRepository.existsByEmail(signUpDto.getEmail())){
-            return new ResponseEntity<>("Email is already taken!",
-                    HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>("Email is already taken!", HttpStatus.BAD_REQUEST);
         }
         // create user object
         User user = new User();
@@ -55,28 +65,10 @@ public class AuthController {
         user.setUsername(signUpDto.getUsername());
         user.setEmail(signUpDto.getEmail());
         user.setPassword(passwordEncoder.encode(signUpDto.getPassword()));
-
         Role roles = roleRepository.findByName("ROLE_ADMIN").get();
         user.setRoles(Collections.singleton(roles));
         userRepository.save(user);
-        return new ResponseEntity<>("User registered successfully",
-                HttpStatus.OK);
+        return new ResponseEntity<>("User registered successfully", HttpStatus.OK);
     }
-   // localhost:8080/api/auth/signin
-    @PostMapping("/signin")
-    public ResponseEntity<String> authenticateUser(@RequestBody LoginDto loginDto) {
-
-
-        Authentication authentication = authenticationManager.authenticate(
-
-                new UsernamePasswordAuthenticationToken(loginDto.getUsernameOrEmail(),loginDto.getPassword()) );
-
-        SecurityContextHolder.getContext().setAuthentication(authentication);
-
-        return new ResponseEntity<>("User signed-in successfully!.", HttpStatus.OK);
-
-    }
-
 }
-
 
